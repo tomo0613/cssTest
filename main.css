@@ -1,0 +1,224 @@
+@charset "UTF-8";
+
+:root {
+    --bg-grad-deep-blue: linear-gradient(to top left, #033, #034 90%, #054);
+    --bg-grad-c1: linear-gradient(to top, #bb9564, #efbe83 7%, #edc986 10%, #eecb87 13%,#ead390 20%, #e3cf92 25%, #ccc193 35%, #b2af8e 45%, #9b9f88 55%, #909784 60%, #7a887b 70%, #708079 75%, #5e7370 85%, #5b716e 88%, #51666b);
+    --bg-grad-azure: linear-gradient(to top right, #8081A1, #748BA0 10%, #6896A0, #4EAEA0, #C4B5A6);
+    --bg-grad-c0: linear-gradient(to top right, rgba(156,129,129,1), rgba(191,182,116,1) 20%, rgba(155,184,149,1), rgba(134,169,160,1));
+    
+    --page-background: var(--bg-grad-calm);
+    --base-unit: 24px;
+}
+
+body {
+  height: 100vh;
+  margin: 0 auto;
+  color: #FFF;
+  background: var(--page-background, #023);
+  font-family: sans-serif;
+  font-size: calc(var(--base-unit) / 2);
+}
+
+main {
+  --tab-size: calc(var(--base-unit) * 4);
+
+  display: grid;
+  height: 480px;
+  grid-gap: 0.2em;
+  grid-template-columns: var(--tab-size) auto;
+  grid-template-rows: var(--tab-size) auto;
+  grid-template-areas:
+    "main-menu dashboard"
+    "tab-list tab-panel-container";
+}
+
+.tab-list {
+  grid-area: tab-list;
+}
+
+.tab-list__tab {
+  width: var(--tab-size);
+  height: var(--tab-size);
+  cursor: pointer;
+}
+
+.tab-list__tab:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.tab-list__tab--active {
+  background: rgba(0, 255, 0, 0.2);
+}
+
+.tab-panel-container {
+  grid-area: tab-panel-container;
+}
+
+.tab-panel-container__tab-panel {
+  display: none;
+}
+
+.tab-panel-container__tab-panel--active {
+  display: block;
+}
+
+/**
+  what is CSS?
+  HTML only meant to be describe content
+  CSS is a language for specifying how (XML based) documents are presented to users (HTML, SVG, XUL, ...)
+  Browsers apply CSS rules to document elements
+  A rule is formed from a selector and a set of properties
+
+  https://developer.mozilla.org/en-US/docs/Learn/CSS/Introduction_to_CSS/How_CSS_works
+  !loading external css is render blocking
+  Firefox blocks all scripts when there is a style sheet that is still being loaded and parsed.
+  WebKit blocks scripts only when they try to access certain style properties that may be affected by unloaded style sheets. 
+  
+  https://www.youtube.com/watch?v=gqc88qWuiI4
+  Rendering cycle: (happens on document modifications [add or remove elements, change content or attributes...])
+  1. Build the DOM
+  2. Calculate CSS properties
+    every CSS property has to be calculated, for every element on a page
+  3. Build the rendering tree
+    consist of [boxes / frames(ff) / render object(wk)] (not DOM elements)
+    excludes not visible ("display: none") DOM elements and tags eg: <head>, <script>, ...
+    includes elements that are visible but not part of the DOM eg: pseudo elements, anonymus element
+    boxes have containing blocks instead of parent nodes, usually these are the same ase DOM tree parents, but
+    absolute positioned boxes contained by their closest not "static" positioned ancestor
+  4. Calculate layout
+    dimensions and position of boxes calculated
+  5. Paint (CPU expensive)
+    colors of pixels are computed, then a bitmap is generated and sent to the GPU
+  6. Composite (faster, Memory expensive [if used too much])
+    (opacity, transform)
+    layer bitmaps transferred to the GPU that combines them then draw the result to the screen
+
+  Default browser styles
+    each browser (sometimes version!) has its own set of default styles
+    CSS Reset (*, *::before, *::after)
+
+  Rules are "Cascading"
+    top to bottom
+    elements inherit styles from ancestors
+
+  Selector precedence / specificity (id > class > tag)
+    when multiple rules applied to the same element
+      if selector specificities are the same the bottom most rule will be applied
+      the rule with the more specific selector will be applied
+    inline styles are the most specific (+ latest in order)
+    !important declarations do not alter the specificity, but rather take precedence over "normal" declarations.
+    *build rules from bottom to top
+  
+  
+  Why CSS sucks?
+    every rule is global (any rule can effect any other rule)
+    people don't tend to fix rules, rather they override them
+    ( https://wiki.csswg.org/ideas/mistakes )
+
+  Techniques to solve the above
+    CSS Methodologies 
+    CSS modules (all class names and animation names are scoped locally)
+
+  CSS Methodologies
+    BEM (Block, Element, Modifier) http://getbem.com/introduction/
+      Block - an entity that is meaningful on its own (eg: menu)
+      Element - an entity that is part of a block and have no standalone meaning (eg: menu__elem)
+        style can not depend on other blocks/elements on a page  
+        Class name selector only
+      Modifier - a flag on  a block or an element, that changes appearance, behavior or state. (eg: menu__elem--selected, menu--hidden)
+    OOCSS (Object-Oriented CSS)
+      Separating container and content with CSS “objects” (eg: button [as parent class] > secondary-button [specific class])
+    SMACSS (Scalable and Modular Architecture for CSS)
+      Style-guide to write your CSS with five categories for CSS rules
+    SUITCSS
+      Structured class names and meaningful hyphens
+    ...
+
+  Performance
+    @import
+    for better performance use inline styles (for critical parts) then load the rest "async" (media "none" -> "all")
+
+  Optimization
+    minimize repetition (tools can help)
+      CSS Colorguard
+      Parker (stylesheet analysis tool)
+  
+  CSS specs https://www.w3.org/Style/CSS/specs.en.html
+    since v2.1
+
+  CSS variables
+
+  Grid layout
+  
+  Media queries https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries
+    ~ can help when we want device specific styles / logic
+    A media query is composed of an optional media type (screen, print, ...) and any number of media feature expressions
+    eg: @media (min-width: 30em) and (orientation: landscape) { ... }
+    ~ are accessible via MediaQueryList in JS
+    CSS imports, link and source(picture, audio, video) tags can use media queries 
+      @import url('landscape.css') screen and (orientation:landscape);
+      <link rel="stylesheet" href="style.css" media="all">
+
+  Feature queries https://developer.mozilla.org/en-US/docs/Web/CSS/@supports
+    ~ can detect that the current browser is supports the specified CSS feature(s)
+    ~ are accessible via CSSSupportsRule in JS
+    eg: @supports not (display: grid) { ... }
+
+  Transition
+    CSS transitions provide a way to control animation speed when changing CSS properties
+
+  Animations
+    ~ make it possible to animate transitions from one CSS style configuration to another
+
+  Selectors 
+    Simple selectors 
+      Match elements based on their type, class, or id
+    Attribute selectors
+      Match elements based on their attributes/attribute values
+    Pseudo-classes (:) 
+      keywords that added to selectors specifies a special state of the selected element
+      active, checked, disabled, focus, hover, invalid, link, not(), nth-of-type(), required, valid, visited, ...
+      lvl4 :has()
+    Pseudo-elements (::)
+      keywords that added to selectors lets you style a specific part of the selected element
+      after, before, first-letter, first-line, selection, backdrop, ...
+    Combinators
+      Descendant selector [A B]
+      Child selector [A > B]
+      Adjacent sibling selector [A + B]
+      General sibling selector [A ~ B]
+
+  Units
+    absolute
+      mm, cm, in 
+      px (1/96 in)
+      pt (points [1/72 in]), pc (picas [12 pt])
+    relative
+      (to font size)
+        em (of the current element, specified by the width of a capital letter "M")
+        rem (root em, base font-size)
+        ex (height of a lower case x)
+        ch (width of a digit the number 0)
+        ?lh
+        ...
+      (to screen size)
+        vw, vh (1/100th of the width/height of the viewport)
+        vmin, vmax (1vw or 1vh, whichever is smaller/larger)
+      (to parent)
+        %
+  Unitless values can be used in some places
+    magin: 0;
+    line-height: 1.5; (= line-height * 1.5)
+
+  
+  Coming
+    image-set
+      a way to provide a list of img sources to backround
+      eg: background-image: image-set(
+        url('/img1.jpg') 1x,
+        url('/img2.jpg') 2x
+      );
+    background-element
+    ...
+
+*/
